@@ -1,6 +1,5 @@
 # Ignore all files with the same name in subdirectories
-**/getTests.sh
+**/getTests.py
 
 # Track specific files in the root directory
-!runTests.sh
-!getTests.py
+/getTests.py
