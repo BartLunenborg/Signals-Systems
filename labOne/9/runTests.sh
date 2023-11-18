@@ -17,7 +17,7 @@ for infile in "$TEST_DIR"/*.in; do
     if [ "$actual" = "$(cat $expected)" ]; then
         passedTests=$((passedTests + 1))   
     else 
-        failedTests+="In test $infile:\nexpected: $(cat $expected)\nactual  : $actual"
+        failedTests+="\nIn test $infile:\nexpected: $(cat $expected)\nactual  : $actual"
     fi
 done
 
@@ -25,5 +25,5 @@ done
 if [ "$totalTests" -eq "$passedTests" ]; then
     echo "Passed all $totalTests/$totalTests tests!"
 else
-    echo -e "There were test failures, passed $passedTests/$totalTests tests:\n$failedTests"
+    echo -e "There were test failures, passed $passedTests/$totalTests tests:$failedTests"
 fi

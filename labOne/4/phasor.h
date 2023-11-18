@@ -22,5 +22,9 @@ void convertToPolar(Vector, Phasor *);
 void phasorAdd(Phasor, Phasor, Phasor *);
 // Print a Phasor
 void phasorPrint(Phasor);
+//
+int* sample(double, double, double, double, double);
+//
+void printArr(int *, int);
 
 #endif

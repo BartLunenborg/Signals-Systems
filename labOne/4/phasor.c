@@ -2,6 +2,7 @@
 // Functions for Phasor operations
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include "phasor.h"
 
@@ -27,4 +28,17 @@ void phasorPrint(Phasor ph) {
   } else {
     printf("x(t)=%.2f*cos(2*pi*%.2f*t%+.2f)\n", ph.a, ph.f, ph.phi);
   }
+}
+
+int* sample(double f_s, double n, double a, double f, double phi) {
+  int* samples = calloc(n, sizeof(int));
+  return samples;
+}
+
+void printArr(int* arr, int size) {
+  printf("[%d", arr[0]);
+  for (int i = 1; i < size; i++) {
+    printf(",%d", arr[i]);
+  }
+  printf("]\n");
 }
