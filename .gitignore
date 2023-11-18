@@ -1,5 +1,5 @@
 # Ignore all files with the same name in subdirectories
-**/runTests.sh
+**/getTests.sh
 
 # Track specific files in the root directory
 !runTests.sh
