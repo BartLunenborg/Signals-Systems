@@ -1,13 +1,15 @@
 #!/bin/bash
+# Script used to automate the running of test cases
+# Test input should be in .in files, output in .out files
 
-EXECUTABLE="./main"
-TEST_DIR="./tests"
+EXECUTABLE="./main"  # Name of the compiled c program
+TEST_DIR="./tests"   # Directory containing the tests
 
 totalTests=0
 passedTests=0
 failedTests=""
 
-# Run tests
+# Run tests (assumes files names from [1..n].in / .out)
 for infile in "$TEST_DIR"/*.in; do
     totalTests=$((totalTests + 1))
 
@@ -21,7 +23,7 @@ for infile in "$TEST_DIR"/*.in; do
     fi
 done
 
-# Print test results
+# Show test results
 if [ "$totalTests" -eq "$passedTests" ]; then
     echo "Passed all $totalTests/$totalTests tests!"
 else

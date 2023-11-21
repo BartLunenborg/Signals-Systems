@@ -1,3 +1,4 @@
+# Python script used to automate downloading tests from Themis
 import os
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -59,11 +60,14 @@ if __name__ == "__main__":
         print("Usage: python3 getTests.py base_link in_count out_count")
         sys.exit(1)
 
-    username = "s3410579"  # Username
-    base_link = sys.argv[1]
-    in_count = int(sys.argv[2])
-    out_count = int(sys.argv[3])
+    username = "s3410579"  # Your Themis username
 
-    # Prompt for the password
+    # Link you get when clicking on test case, minus the n.in or n.out
+    base_link = sys.argv[1]
+
+    in_count = int(sys.argv[2])   # Number of in files
+    out_count = int(sys.argv[3])  # Number of out files
+
+    # Prompt for the password to Themis (not hard-coded for safety)
     password = getpass.getpass(f"Please type the password for {username}: ")
     download_files(base_link, username, password, in_count, out_count)
