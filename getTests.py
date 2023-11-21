@@ -7,12 +7,12 @@ import time
 import sys
 
 
-def download_files(base_link, username, password, in_file_count, out_file_count, script_directory):
-    # Set up Chrome options
+def download_files(base_link, username, password, in_count, out_count):
     chrome_options = Options()
-    chrome_options.add_argument("--headless")  # You can remove this line to see the browser
+    chrome_options.add_argument("--headless")  # Hide browser
 
     # Set download directory to the script directory
+    script_directory = os.path.dirname(os.path.abspath(__file__))
     prefs = {"download.default_directory": script_directory}
     chrome_options.add_experimental_option("prefs", prefs)
 
@@ -32,19 +32,18 @@ def download_files(base_link, username, password, in_file_count, out_file_count,
     # Wait for the login to complete
     time.sleep(2)
 
-    # Download the files
-    for i in range(1, in_file_count + 1):
-        in_link = f"{base_link}{i}.in"
-        driver.get(in_link)
+    # Download the in files
+    for i in range(1, in_count + 1):
+        driver.get(f"{base_link}{i}.in")
         time.sleep(1)  # Adjust the sleep duration based on your needs
         content = driver.find_element("tag name", "pre").text + "\n"
         save_path = os.path.join(script_directory, f"{i}.in")
         with open(save_path, "w") as file:
             file.write(content)
 
-    for i in range(1, out_file_count + 1):
-        out_link = f"{base_link}{i}.out"
-        driver.get(out_link)
+    # Download the out files
+    for i in range(1, out_count + 1):
+        driver.get(f"{base_link}{i}.out")
         time.sleep(1)  # Adjust the sleep duration based on your needs
         content = driver.find_element("tag name", "pre").text + "\n"
         save_path = os.path.join(script_directory, f"{i}.out")
@@ -57,20 +56,14 @@ def download_files(base_link, username, password, in_file_count, out_file_count,
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
-        print("Usage: python script.py base_link in_file_count out_file_count")
+        print("Usage: python3 getTests.py base_link in_count out_count")
         sys.exit(1)
 
-    # Your username
-    username = "s3410579"
-
+    username = "s3410579"  # Username
     base_link = sys.argv[1]
-    in_file_count = int(sys.argv[2])
-    out_file_count = int(sys.argv[3])
-
-    # Get the directory of the script
-    script_directory = os.path.dirname(os.path.abspath(__file__))
+    in_count = int(sys.argv[2])
+    out_count = int(sys.argv[3])
 
     # Prompt for the password
     password = getpass.getpass(f"Please type the password for {username}: ")
-
-    download_files(base_link, username, password, in_file_count, out_file_count, script_directory)
+    download_files(base_link, username, password, in_count, out_count)

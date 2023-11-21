@@ -17,7 +17,7 @@ for infile in "$TEST_DIR"/*.in; do
     if [ "$actual" = "$(cat $expected)" ]; then
         passedTests=$((passedTests + 1))   
     else 
-        failedTests+="\nIn test $infile:\nexpected: $(cat $expected)\nactual  : $actual"
+        failedTests+="\n\nIn test $infile:\nexpected: $(cat $expected)\nactual  : $actual"
     fi
 done
 
