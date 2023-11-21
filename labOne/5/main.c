@@ -8,15 +8,15 @@ int main(int argc, char *argv[]) {
   int f_s, n, m;
   scanf("%d %d %d", &f_s, &n, &m);
 
-  Sinusoid* sinusoids = malloc(m * sizeof(Sinusoid));
+  Sinusoid* sss = calloc(n, sizeof(Sinusoid));
   for (int i = 0; i < m; i++) {
-    scanf("%lf %lf %lf", &sinusoids[i].a, &sinusoids[i].f, &sinusoids[i].phi);
+    scanf("%lf %lf %lf", &sss[i].a, &sss[i].f, &sss[i].phi);
   }
 
-  int* samples = sample(f_s, n, sinusoidsAdd(sinusoids, m));
+  int* samples = sampleSinusoids(f_s, n, sss, m);
   printArr(samples, n);
 
-  free(sinusoids);
+  free(sss);
   free(samples);
   return 0;
 }

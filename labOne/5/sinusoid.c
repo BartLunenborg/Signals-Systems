@@ -9,7 +9,7 @@
 double PI = 3.14159265358979;
 
 void convertToPolar(Vector vec, Sinusoid* s) {
-  s->a = sqrt(vec.x*vec.x + vec.y * vec.y);
+  s->a = sqrt(vec.x * vec.x + vec.y * vec.y);
   s->phi = atan2(vec.y, vec.x);
   s->phi = vec.y == 0 && vec.x < 0 ? -s->phi : s->phi;
 }
@@ -21,17 +21,7 @@ void sinusoidAdd(Sinusoid s_0, Sinusoid s_1, Sinusoid* s_2) {
     Vector vec_2 = {vec_0.x + vec_1.x, vec_0.y + vec_1.y};
     convertToPolar(vec_2, s_2);
     s_2->f = s_0.f;
-  } else {
-
-  }
-}
-
-Sinusoid sinusoidsAdd(Sinusoid* sinusoids, int size) {
-  Sinusoid sum = sinusoids[0];
-  for (int i = 1; i < size; i++) {
-    sinusoidAdd(sum, sinusoids[i], &sum);
-  }
-  return sum;
+  } 
 }
 
 void sinusoidPrint(Sinusoid s) {
@@ -42,11 +32,26 @@ void sinusoidPrint(Sinusoid s) {
   }
 }
 
-int* sample(int f_s, int n, Sinusoid s) {
+int* sampleSinusoid(int f_s, int n, Sinusoid s) {
   int* samples = malloc(n * sizeof(int));
-  s.f = s.f / f_s;
+  s.f /= f_s;
   for (int i = 0; i < n; i++) {
     samples[i] = s.a * cos(2 * PI * s.f * i + s.phi);
+  }
+  return samples;
+}
+
+int* sampleSinusoids(int f_s, int n, Sinusoid* sss, int m) {
+  int* samples = malloc(n * sizeof(int));
+  for (int i = 0; i < m; i++) {
+    sss[i].f /= f_s;
+  }
+  for (int i = 0; i < n; i++) {
+    double val = 0;
+    for (int j = 0; j < m; j++) {
+      val += sss[j].a * cos(2 * PI * sss[j].f * i + sss[j].phi);
+    }
+    samples[i] = (int)val;
   }
   return samples;
 }

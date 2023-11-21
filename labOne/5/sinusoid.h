@@ -33,20 +33,12 @@ typedef struct Vector {
 void convertToPolar(Vector vector, Sinusoid* sinusoid);
 
 /*
- * Add two Sinusoids
+ * Add two Sinusoids with equal frequency
  * @param s_0  The first Sinusoid to add
  * @param s_1  The second Sinusoid to add
  * @param s_2  Pointer to the new Sinusoid
  */
 void sinusoidAdd(Sinusoid s_0, Sinusoid s_1, Sinusoid* s_2);
-
-/*
- * Add an array of Sinusoids (non-empty)
- * @param sinusoids  The array of sinusoids 
- * @param size       The size of the array
- * @return           The sum of all Sinusoids
- */
-Sinusoid sinusoidsAdd(Sinusoid* sinusoids, int size);
 
 /*
  * Formatted print a Sinusoid in the form x(t)=a*cos(2*pi*f*t+phi)
@@ -55,13 +47,23 @@ Sinusoid sinusoidsAdd(Sinusoid* sinusoids, int size);
 void sinusoidPrint(Sinusoid sinusoid);
 
 /*
- * Given sampling rate f_s, num samples n; takes n samples from Sinusoid s.
+ * Given sampling rate f_s, num samples n; takes n samples from a Sinusoid.
  * @param f_s       The sampling rate
  * @param n         The number of samples
  * @param sinusoid  The Sinusoid to take samples from
  * @return          A pointer to a calloc'd array of samples values (to be freed by caller)
  */
-int* sample(int f_s, int n, Sinusoid sinusoid);
+int* sampleSinusoid(int f_s, int n, Sinusoid sinusoid);
+
+/*
+ * Given sampling rate f_s, num samples n; takes n samples from m Sinusoids.
+ * @param f_s        The sampling rate
+ * @param n          The number of samples
+ * @param sinusoids  The Sinusoids to take samples from
+ * @param m          The number of Sinusoids
+ * @return           A pointer to a calloc'd array of samples values (to be freed by caller)
+ */
+int* sampleSinusoids(int f_s, int n, Sinusoid* sinusoids, int m);
 
 /*
  * Print a non-empty array of ints formatted: [a, b, c, .. n]\n
