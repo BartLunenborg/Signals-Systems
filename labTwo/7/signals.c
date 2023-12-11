@@ -99,25 +99,25 @@ Signal correlate(const Signal x, const Signal h) {
 }
 
 Pearson pearsonCorrelate(const Signal x, const Signal h) {
-  double h_mean = 0;
-  for (int i = 0; i < h.length; i++) h_mean += h.signal[i];
-  h_mean /= h.length;
+  double mean_h = 0;
+  for (int i = 0; i < h.length; i++) mean_h += h.signal[i];
+  mean_h /= h.length;
   
   int length = x.length - h.length + 1;
   double *arr = malloc(length * sizeof(double));
   for (int i = 0; i < length; i++) {
-    double x_mean = 0;
-    for (int j = 0; j < h.length; j++) x_mean += x.signal[j + i];
-    x_mean /= h.length;
-    double corr = 0;
-    double x_div = 0;
-    double h_div = 0;
+    double mean_x = 0;
+    for (int j = 0; j < h.length; j++) mean_x += x.signal[j + i];
+    mean_x /= h.length;
+    double cov = 0;
+    double sd_x = 0;
+    double sd_h = 0;
     for (int j = 0; j < h.length; j++) {
-      corr  += (h.signal[j] - h_mean) * (x.signal[j+i] - x_mean);
-      x_div += (x.signal[j+i] - x_mean) * (x.signal[j+i] - x_mean);
-      h_div += (h.signal[j] - h_mean) * (h.signal[j] - h_mean);
+      cov  += (h.signal[j] - mean_h) * (x.signal[j+i] - mean_x);
+      sd_x += (x.signal[j+i] - mean_x) * (x.signal[j+i] - mean_x);
+      sd_h += (h.signal[j] - mean_h) * (h.signal[j] - mean_h);
     }
-    arr[i] = corr / (sqrt(x_div) * sqrt(h_div));
+    arr[i] = cov / (sqrt(sd_x) * sqrt(sd_h));
   }
 
   Pearson p = {length, arr};
