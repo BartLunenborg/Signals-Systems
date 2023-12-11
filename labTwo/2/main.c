@@ -1,24 +1,20 @@
 /** @file   main.c
- *  @brief  Problem 1 of lab 2
+ *  @brief  Problem 2 of lab 2
  *  @author Bart Lunenborg, s3410579
  */
 
 #include "signals.h"
+#include <stdlib.h>
 
 int main(int argc, char *argv[]) {
-  
-  Signal h_1 = readSignal();
-  Signal h_2 = readSignal();
-  Signal h_3 = filter(h_1, h_2);
+  Signal *signals = malloc(5 * sizeof(Signal));
+  for (int i = 0; i < 3; i++) {
+    signals[i] = readSignal();
+  }
+  signals[3] = convolve(signals[0], signals[1]);
+  signals[4] = convolve(signals[2], signals[3]);
+  printSignal(signals[4]) ;
 
-  Signal x = readSignal();
-  Signal y = filter(x, h_3);
-  printSignal(y) ;
-
-  freeSignal(h_1);
-  freeSignal(h_2);
-  freeSignal(h_3);
-  freeSignal(x);
-  freeSignal(y);
+  freeSignals(signals, 5);
   return 0;
 }

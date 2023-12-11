@@ -6,7 +6,6 @@
 #ifndef __SIGNALS_H__
 #define __SIGNALS_H__
 
-
 /**
  * A discrete signal contain length integers.
  */
@@ -18,33 +17,50 @@ typedef struct Signal {
 
 /**
  * Given the length of a discrete signal, reads it from the input.
- * @param length  The length of the signal
- * @return        A pointer to the calloc'd array with the signal (to be freed by caller)
+ * @return  The read Signal (to be freed by caller)
  */
 Signal readSignal();
 
 
 /**
  * Given a pointer to an array of integers and its length, prints it formatted [1,2,3..n].
- * @param length  The length of the signal
- * @param signal  The array of ints containing the signal
+ * @param signal  The signal to print
  */
-void printSignal(Signal);
+void printSignal(Signal signal);
 
 
 /**
  * Given a signal, frees it.
  * @Param signal  The signal to be freed
  */
-void freeSignal(Signal);
+void freeSignal(Signal signal);
+
+
+/**
+ * Given an array of signals, frees it.
+ * @Param signals  The signals array to be freed
+ * @Param length   The length of the array
+ */
+void freeSignals(Signal* signals, int length);
 
 
 /** 
- * Given a Fir filter and a signal, slides the filter across the signal (where there is overlap).
- * @Param x  The signal
+ * Returns the convolution of Signal x and h.
+ * @Param x  The input signal
  * @Param h  The filter
- * @return   The signal that is the result
+ * @return   The resulting Signal after convolution (to be freed by caller)
  */
-Signal filter(Signal x, Signal h);
+Signal convolve(Signal x, Signal h);
+
+
+/**
+ * Given Signal x and y, finds Signal h.
+ * If h did not produce y from x, return h with length = -1.
+ * Length = -1 indicate that the Signal y was not produced by x through a FIR filter.
+ * @Param x  The input Signal
+ * @Param y  The output Signal
+ * @return   The Signal h that made y from x (to be freed by caller)
+ */
+Signal firFilterH(Signal x, Signal y);
 
 #endif

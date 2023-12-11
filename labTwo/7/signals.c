@@ -1,5 +1,10 @@
+/** @file   signals.c
+ *  @brief  Implementations of functions in signals.h
+ *  @author Bart Lunenborg, s3410579
+ */
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "signals.h"
 
 Signal readSignal() {
@@ -26,6 +31,15 @@ void printSignal(const Signal s) {
   printf("]\n");
 }
 
+void printPearson(const Pearson p) {
+  printf("%d: [", p.length);
+  if (p.length > 0) {
+    printf("%.5lf", p.corrs[0]);
+    for (int i=1; i < p.length; i++) printf(",%.5lf", p.corrs[i] < 0 && p.corrs[i] > -0.00001 ? 0.00000 : p.corrs[i]);
+  }
+  printf("]\n");
+}
+
 void freeSignal(Signal s) {
   free(s.signal);
 }
@@ -38,7 +52,8 @@ void freeSignals(Signal *ss, const int length) {
 }
 
 Signal convolve(const Signal x, const Signal h) {
-  Signal y = {x.length + h.length - 1, calloc(x.length + h.length - 1, sizeof(int))};
+  int length = x.length + h.length - 1;
+  Signal y = {length, calloc(length, sizeof(int))};
   for (int i = 0; i < x.length; i++) {
     for (int j = 0; j < h.length; j++) {
       y.signal[i+j] += x.signal[i] * h.signal[j];
@@ -81,4 +96,30 @@ Signal correlate(const Signal x, const Signal h) {
   }
   Signal y = {length, arr};
   return y;
+}
+
+Pearson pearsonCorrelate(const Signal x, const Signal h) {
+  double h_mean = 0;
+  for (int i = 0; i < h.length; i++) h_mean += h.signal[i];
+  h_mean /= h.length;
+  
+  int length = x.length - h.length + 1;
+  double *arr = malloc(length * sizeof(double));
+  for (int i = 0; i < length; i++) {
+    double x_mean = 0;
+    for (int j = 0; j < h.length; j++) x_mean += x.signal[j + i];
+    x_mean /= h.length;
+    double corr = 0;
+    double x_div = 0;
+    double h_div = 0;
+    for (int j = 0; j < h.length; j++) {
+      corr  += (h.signal[j] - h_mean) * (x.signal[j+i] - x_mean);
+      x_div += (x.signal[j+i] - x_mean) * (x.signal[j+i] - x_mean);
+      h_div += (h.signal[j] - h_mean) * (h.signal[j] - h_mean);
+    }
+    arr[i] = corr / (sqrt(x_div) * sqrt(h_div));
+  }
+
+  Pearson p = {length, arr};
+  return p;
 }

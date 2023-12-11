@@ -1,5 +1,5 @@
 /** @file   main.c
- *  @brief  Problem 1 of lab 2
+ *  @brief  Problem 3 of lab 2
  *  @author Bart Lunenborg, s3410579
  */
 

@@ -59,11 +59,11 @@ Signal firFilterH(Signal x, Signal y) {
   }
   Signal h = {length, arr};
 
+  // check x * h = y
   for (int i = length; i < y.length; i++) {
     if (sums[i] != y.signal[i]) {
-      free(sums);
       h.length = -1;
-      return h;
+      break;
     }
   }
 

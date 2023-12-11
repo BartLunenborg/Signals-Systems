@@ -6,7 +6,6 @@
 #ifndef __SIGNALS_H__
 #define __SIGNALS_H__
 
-
 /**
  * A discrete signal contain length integers.
  */
@@ -49,7 +48,7 @@ void freeSignals(Signal* signals, int length);
  * Returns the convolution of Signal x and h.
  * @Param x  The input signal
  * @Param h  The filter
- * @return   The resulting Signal after convolution
+ * @return   The resulting Signal after convolution (to be freed by caller)
  */
 Signal convolve(Signal x, Signal h);
 
@@ -60,9 +59,8 @@ Signal convolve(Signal x, Signal h);
  * Length = -1 indicate that the Signal y was not produced by x through a FIR filter.
  * @Param x  The input Signal
  * @Param y  The output Signal
- * @return   The Signal h that made y from x
+ * @return   The Signal h that made y from x (to be freed by caller)
  */
 Signal firFilterH(Signal x, Signal y);
-
 
 #endif

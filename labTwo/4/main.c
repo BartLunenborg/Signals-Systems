@@ -1,6 +1,6 @@
-/** @file    main.c
- *  @brief   Problem 1 of lab 2
- *  @author  Bart Lunenborg, s3410579
+/** @file   main.c
+ *  @brief  Problem 4 of lab 2
+ *  @author Bart Lunenborg, s3410579
  */
 
 #include "signals.h"

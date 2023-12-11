@@ -30,7 +30,14 @@ void freeSignal(Signal s) {
   free(s.signal);
 }
 
-Signal filter(Signal x, Signal h) {
+void freeSignals(Signal *ss, int length) {
+  for (int i = 0; i < length; i++) {
+    freeSignal(ss[i]);
+  }
+  free(ss);
+}
+
+Signal convolve(Signal x, Signal h) {
   Signal y = {x.length + h.length - 1, calloc(x.length + h.length - 1, sizeof(int))};
   for (int i = 0; i < x.length; i++) {
     for (int j = 0; j < h.length; j++) {
@@ -38,4 +45,28 @@ Signal filter(Signal x, Signal h) {
     }
   }
   return y;
+}
+
+Signal firFilterH(Signal x, Signal y) {
+  int length = y.length - x.length + 1;
+  int *arr = calloc(length, sizeof(int));
+  int *sums = calloc(y.length, sizeof(int));
+  for (int i = 0; i < length; i++) {
+    arr[i] = (y.signal[i] - sums[i]) / x.signal[0];
+    for (int j = 0; j < x.length; j++) {
+      sums[i+j] += arr[i] * x.signal[j];
+    }
+  }
+  Signal h = {length, arr};
+
+  // check x * h = y
+  for (int i = length; i < y.length; i++) {
+    if (sums[i] != y.signal[i]) {
+      h.length = -1;
+      break;
+    }
+  }
+
+  free(sums);
+  return h;
 }
