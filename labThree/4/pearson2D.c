@@ -301,9 +301,28 @@ void fft2D(int direction, int width, int height, double **re, double **im) {
   /* Note that the parameters re and im denotes the REal part and 
    * the IMaginary part of the 2D image.
    */
-  printf("fft2D: YOU HAVE TO IMPLEMENT THE BODY OF THIS FUNCTION YOURSELF\n");
-  printf("MAKE USE OF THE fft1D() FUNCTION\n");
-  exit(0);
+  for (int i = 0; i < height; i++) {
+    fft1D(direction, width, re[i], im[i]);
+  }
+  double **reT = allocDoubleArr2D(height, width);
+  double **imT = allocDoubleArr2D(height, width);
+  for (int i = 0; i < width; i++) {
+    for (int j = 0; j < height; j++) {
+      reT[i][j] = re[j][i];
+      imT[i][j] = im[j][i];
+    }
+  }
+  for (int i = 0; i < width; i++) {
+    fft1D(direction, height, reT[i], imT[i]);
+  }
+  for (int i = 0; i < height; i++) {
+    for (int j = 0; j < width; j++) {
+      re[i][j] = reT[j][i];
+      im[i][j] = imT[j][i];
+    }
+  }
+  freeDoubleArr2D(reT);
+  freeDoubleArr2D(imT);
 }
 
 void fftCorrelator(GrayImage image, GrayImage mask,
