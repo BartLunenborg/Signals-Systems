@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <complex.h>
+#include <string.h>
 
 typedef _Complex double cplx;
 double PI = 3.14159265358979323846;
@@ -110,12 +111,8 @@ Signal *padZeros(const Signal a, const Signal b, int n) {
   Signal *signals = calloc(2, sizeof(Signal));
   Signal xMod = {n, calloc(n, sizeof(cplx))};
   Signal hMod = {n, calloc(n, sizeof(cplx))};
-  for (int i = 0; i < a.length; i++) {
-    xMod.signal[i] = a.signal[i];
-  }
-  for (int i = 0; i < b.length; i++) {
-    hMod.signal[i] = b.signal[i];
-  }
+  memcpy(xMod.signal, a.signal, a.length * sizeof(cplx));
+  memcpy(hMod.signal, b.signal, b.length * sizeof(cplx));
   signals[0] = xMod;
   signals[1] = hMod;
   return signals;
@@ -168,9 +165,7 @@ Signal correlate(const Signal x, const Signal h) {
   signals[1] = convolve(x, signals[0]);
   int length = x.length - h.length + 1;
   Signal y = {length, calloc(length, sizeof(cplx))};
-  for (int i = 0; i < length; i++) {
-    y.signal[i] = signals[1].signal[i + h.length - 1];
-  }
+  memcpy(y.signal, signals[1].signal + h.length - 1, length * sizeof(cplx));
   freeSignals(signals, 2);
   return y;
 }
