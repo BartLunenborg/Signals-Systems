@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <complex.h>
+#include <string.h>
 
 typedef _Complex double cplx;
 double PI = 3.14159265358979323846;
@@ -51,12 +52,15 @@ void freeSignals(Signal *ss, const int length) {
 }
 
 // finds the smallest number > n that is a power of two
-int powerOfTwo(int n) {
-  int p2 = 1;
-  while (p2 < n) {
-    p2 *= 2;
+inline int powerOfTwo(const int n) {
+  if (n & (n - 1)) {
+    int p2 = 1;
+    while (p2 < n) {
+      p2 <<= 1;
+    }
+    return p2;
   }
-  return p2;
+  return n;
 }
 
 // splits the even and odd indices into two different arrays
@@ -97,16 +101,12 @@ Signal fft(const Signal a, const cplx omega) {
 
 Signal *padZeros(const Signal a, const Signal b, int n) {
   Signal *signals = calloc(2, sizeof(Signal));
-  Signal xMod = {n, calloc(n, sizeof(cplx))};
-  Signal hMod = {n, calloc(n, sizeof(cplx))};
-  for (int i = 0; i < a.length; i++) {
-    xMod.signal[i] = a.signal[i];
-  }
-  for (int i = 0; i < b.length; i++) {
-    hMod.signal[i] = b.signal[i];
-  }
-  signals[0] = xMod;
-  signals[1] = hMod;
+  Signal xPadded = {n, calloc(n, sizeof(cplx))};
+  Signal hPadded = {n, calloc(n, sizeof(cplx))};
+  memcpy(xPadded.signal, a.signal, a.length * sizeof(cplx));
+  memcpy(hPadded.signal, b.signal, b.length * sizeof(cplx));
+  signals[0] = xPadded;
+  signals[1] = hPadded;
   return signals;
 }
 
@@ -132,11 +132,11 @@ Signal convolve(const Signal x, const Signal h) {
   }
 
   // inverse fft
-  omega = conj(omega);
-  Signal y = fft(fftxh[0], omega);
+  Signal y = fft(fftxh[0], conj(omega));
   freeSignals(fftxh, 2);
   // adjust y
   y.length = length;
+  y.signal = realloc(y.signal, y.length * sizeof(cplx));
   for (int i = 0; i < length; i++) {
     y.signal[i] /= n;
   }
@@ -157,9 +157,7 @@ Signal correlate(const Signal x, const Signal h) {
   signals[1] = convolve(x, signals[0]);
   int length = x.length - h.length + 1;
   Signal y = {length, calloc(length, sizeof(cplx))};
-  for (int i = 0; i < length; i++) {
-    y.signal[i] = signals[1].signal[i + h.length - 1];
-  }
+  memcpy(y.signal, signals[1].signal + h.length - 1, length * sizeof(cplx));
   freeSignals(signals, 2);
   return y;
 }

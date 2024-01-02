@@ -10,6 +10,7 @@ int main(int argc, char *argv[]) {
   Signal *signals = malloc(3 * sizeof(Signal));
   signals[0] = readSignal();
   signals[1] = readSignal();
+
   signals[2] = convolve(signals[0], signals[1]);
   printSignal(signals[2]);
 

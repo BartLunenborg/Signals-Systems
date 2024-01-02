@@ -1,5 +1,5 @@
 /** @file   main.c
- *  @brief  Problem 3 of lab 3
+ *  @brief  Problem 5 of lab 3
  *  @author Bart Lunenborg, s3410579
  */
 
@@ -9,11 +9,9 @@
 int main(int argc, char *argv[]) {
   Signal *signals = malloc(3 * sizeof(Signal));
   signals[0] = readSignal();
-  signals[1] = readSignal();
+  signals[1] = ntt(signals[0]);
+  printSignal(signals[1]);
 
-  signals[2] = pearsonCorrelate(signals[1], signals[0]);
-  printPearson(signals[2]);
-
-  freeSignals(signals, 3);
+  //freeSignals(signals, 2);
   return 0;
 }

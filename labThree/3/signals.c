@@ -176,10 +176,7 @@ Signal correlate(const Signal x, const Signal h) {
 // values that we need to do the adjusting efficiently
 void helperValues(double *hMean, double *hS, double *xMean, double *xS, const Signal x, const Signal h) {
   int n = h.length;
-  double hSumVals = 0;
-  double xSumVals = 0;
-  double hSumSquares = 0;
-  double xSumSquares = 0;
+  double hSumVals=0, xSumVals=0, hSumSquares=0, xSumSquares=0;
   for (int i = 0; i < n; i++) {
     hSumVals += h.signal[i];
     xSumVals += x.signal[i];
