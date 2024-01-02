@@ -64,11 +64,14 @@ void freeSignals(Signal *ss, const int length) {
 
 // finds the smallest number > n that is a power of two
 int powerOfTwo(int n) {
-  int p2 = 1;
-  while (p2 < n) {
-    p2 *= 2;
+  if (n & (n - 1)) {
+    int p2 = 1;
+    while (p2 < n) {
+      p2 <<= 1;
+    }
+    return p2;
   }
-  return p2;
+  return n;
 }
 
 // splits the even and odd indices into two different arrays
