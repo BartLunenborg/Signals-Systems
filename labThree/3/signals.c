@@ -63,7 +63,7 @@ void freeSignals(Signal *ss, const int length) {
 }
 
 // finds the smallest number > n that is a power of two
-int powerOfTwo(int n) {
+int _powerOfTwo(int n) {
   if (n & (n - 1)) {
     int p2 = 1;
     while (p2 < n) {
@@ -75,7 +75,7 @@ int powerOfTwo(int n) {
 }
 
 // splits the even and odd indices into two different arrays
-void splitEvenOdd(const Signal a, Signal *signals) {
+void _splitEvenOdd(const Signal a, Signal *signals) {
   int n = a.length;
   Signal aEven = {n/2, calloc(n/2, sizeof(cplx))};
   Signal aOdd  = {n/2, calloc(n/2, sizeof(cplx))};
@@ -88,8 +88,8 @@ void splitEvenOdd(const Signal a, Signal *signals) {
 }
 
 // Cooley and Tukey fft algorithm
-Signal fft(const Signal a, const cplx omega) {
-  int n = a.length;
+Signal _fft(const Signal a, const cplx omega) {
+  const int n = a.length;
   if (n == 1) {
     Signal y = {n, calloc(n, sizeof(cplx))};
     y.signal[0] = a.signal[0];
@@ -97,9 +97,9 @@ Signal fft(const Signal a, const cplx omega) {
   }
   cplx x = 1;
   Signal *signals = calloc(4, sizeof(Signal));
-  splitEvenOdd(a, signals);  // signals[0] = a_even, signals[1] = a_odd
-  signals[2] = fft(signals[0], omega * omega);  // y_even
-  signals[3] = fft(signals[1], omega * omega);  // y_odd
+  _splitEvenOdd(a, signals);  // signals[0] = a_even, signals[1] = a_odd
+  signals[2] = _fft(signals[0], omega * omega);  // y_even
+  signals[3] = _fft(signals[1], omega * omega);  // y_odd
   Signal y = {n, calloc(n, sizeof(cplx))};
   for (int i = 0; i < n/2; i++) {
     y.signal[i]     = signals[2].signal[i] + x * signals[3].signal[i];
@@ -110,7 +110,8 @@ Signal fft(const Signal a, const cplx omega) {
   return y; 
 }
 
-Signal *padZeros(const Signal a, const Signal b, int n) {
+// pad two arrays with zeros to increase their length to be a power of 2
+Signal *_padZeros(const Signal a, const Signal b, int n) {
   Signal *signals = calloc(2, sizeof(Signal));
   Signal xMod = {n, calloc(n, sizeof(cplx))};
   Signal hMod = {n, calloc(n, sizeof(cplx))};
@@ -121,21 +122,22 @@ Signal *padZeros(const Signal a, const Signal b, int n) {
   return signals;
 }
 
-Signal *ffts(Signal *signals, cplx omega) {
+// perform the fft on two Signals
+Signal *_ffts(Signal *signals, cplx omega) {
   Signal *ffts = calloc(2, sizeof(Signal));
-  ffts[0] = fft(signals[0], omega);
-  ffts[1] = fft(signals[1], omega);
+  ffts[0] = _fft(signals[0], omega);
+  ffts[1] = _fft(signals[1], omega);
   freeSignals(signals, 2);
   return ffts;
 }
 
 Signal convolve(const Signal x, const Signal h) {
-  int length = x.length + h.length - 1;
-  int n = powerOfTwo(length);
+  const int length = x.length + h.length - 1;
+  const int n = _powerOfTwo(length);
 
   // fft of each (after padding x and h with zeros)
   cplx omega = cexp(2 * I * PI / n);
-  Signal *fftxh = ffts(padZeros(x, h, n), omega);
+  Signal *fftxh = _ffts(_padZeros(x, h, n), omega);
 
   // component multiply
   for (int i = 0; i < n; i++) {
@@ -144,8 +146,9 @@ Signal convolve(const Signal x, const Signal h) {
 
   // inverse fft
   omega = conj(omega);
-  Signal y = fft(fftxh[0], omega);
+  Signal y = _fft(fftxh[0], omega);
   freeSignals(fftxh, 2);
+
   // adjust y
   y.length = length;
   for (int i = 0; i < length; i++) {
@@ -154,7 +157,8 @@ Signal convolve(const Signal x, const Signal h) {
   return y;
 }
 
-Signal reverse(const Signal s) {
+// reverse a Signal
+Signal _reverse(const Signal s) {
   Signal reverse = {s.length, calloc(s.length, sizeof(Signal))};
   for (int i = 0; i < s.length; i++) {
     reverse.signal[i] = s.signal[s.length - 1 - i];
@@ -164,7 +168,7 @@ Signal reverse(const Signal s) {
 
 Signal correlate(const Signal x, const Signal h) {
   Signal *signals = calloc(2, sizeof(Signal));
-  signals[0] = reverse(h);
+  signals[0] = _reverse(h);
   signals[1] = convolve(x, signals[0]);
   int length = x.length - h.length + 1;
   Signal y = {length, calloc(length, sizeof(cplx))};
@@ -174,7 +178,7 @@ Signal correlate(const Signal x, const Signal h) {
 }
 
 // values that we need to do the adjusting efficiently
-void helperValues(double *hMean, double *hS, double *xMean, double *xS, const Signal x, const Signal h) {
+void _helperValues(double *hMean, double *hS, double *xMean, double *xS, const Signal x, const Signal h) {
   int n = h.length;
   double hSumVals=0, xSumVals=0, hSumSquares=0, xSumSquares=0;
   for (int i = 0; i < n; i++) {
@@ -198,16 +202,16 @@ void helperValues(double *hMean, double *hS, double *xMean, double *xS, const Si
 }
 
 Signal pearsonCorrelate(const Signal x, const Signal h) {
-    Signal p = correlate(x, h);
-    // now we do some adjusting
-    double hMean, hS;
-    double *xMean = calloc(x.length, sizeof(double));
-    double *xS = calloc(x.length, sizeof(double));
-    helperValues(&hMean, &hS, xMean, xS, x, h);
-    for (int i = 0; i < p.length; i++) {
-        p.signal[i] = (p.signal[i] - h.length * xMean[i] * hMean) / ((h.length - 1) * xS[i] * hS);
-    }
-    free(xMean);
-    free(xS);
-    return p;
+  Signal p = correlate(x, h);
+  // now we do some adjusting
+  double hMean, hS;  // hMean and hS are constants
+  double *xMean = calloc(x.length, sizeof(double));
+  double *xS = calloc(x.length, sizeof(double));
+  _helperValues(&hMean, &hS, xMean, xS, x, h);
+  for (int i = 0; i < p.length; i++) {
+    p.signal[i] = (p.signal[i] - h.length * xMean[i] * hMean) / ((h.length - 1) * xS[i] * hS);
+  }
+  free(xMean);
+  free(xS);
+  return p;
 }

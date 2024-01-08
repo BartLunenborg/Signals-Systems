@@ -1,8 +1,16 @@
 CC     = gcc
-CFLAGS = -O2 -std=c99 -pedantic -Wall
+CFLAGS = -std=c99 -pedantic -Wall -O2
+TFLAGS = -std=c99 -pedantic -Wall -g
+LIBS   = -lm
 
-main: main.c signals.c
-	$(CC) $(CFLAGS) -o $@ $^ -lm
+MAIN   = main.c signals.c
+TEST   = test.c signals.c
+
+main: $(MAIN)
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
+
+test: $(TEST)
+	$(CC) $(TFLAGS) -o $@ $^ $(LIBS)
 
 clean:
-	rm -f main
+	rm -f main test
