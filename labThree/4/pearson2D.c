@@ -301,28 +301,28 @@ void fft2D(int direction, int width, int height, double **re, double **im) {
   /* Note that the parameters re and im denotes the REal part and 
    * the IMaginary part of the 2D image.
    */
+  
+  // fft on rows
   for (int i = 0; i < height; i++) {
     fft1D(direction, width, re[i], im[i]);
   }
-  double **reT = allocDoubleArr2D(height, width);
-  double **imT = allocDoubleArr2D(height, width);
+
+  // fft on columns
+  double *reTemp = malloc(height * sizeof(double));
+  double *imTemp = malloc(height * sizeof(double));
   for (int i = 0; i < width; i++) {
     for (int j = 0; j < height; j++) {
-      reT[i][j] = re[j][i];
-      imT[i][j] = im[j][i];
+      reTemp[j] = re[j][i];
+      imTemp[j] = im[j][i];
+    }
+    fft1D(direction, height, reTemp, imTemp);
+    for (int j = 0; j < height; j++) {
+      re[j][i] = reTemp[j];
+      im[j][i] = imTemp[j];
     }
   }
-  for (int i = 0; i < width; i++) {
-    fft1D(direction, height, reT[i], imT[i]);
-  }
-  for (int i = 0; i < height; i++) {
-    for (int j = 0; j < width; j++) {
-      re[i][j] = reT[j][i];
-      im[i][j] = imT[j][i];
-    }
-  }
-  freeDoubleArr2D(reT);
-  freeDoubleArr2D(imT);
+  free(reTemp);
+  free(imTemp);
 }
 
 void fftCorrelator(GrayImage image, GrayImage mask,
