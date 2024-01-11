@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 int main(int argc, char *argv[]) {
-  Signal *signals = malloc(3 * sizeof(Signal));
+  Signal *signals = malloc(2 * sizeof(Signal));
   signals[0] = readSignal();
 
   signals[1] = intt(signals[0]);
