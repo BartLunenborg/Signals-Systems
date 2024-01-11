@@ -7,7 +7,8 @@
 
 void convertToPolar(int x, int y, double* r, double* theta) {
   *r = sqrt(x*x + y*y);
-  *theta = atan2(y == 0 ? -0.0 : y, x);
+  *theta = atan2(y, x);
+  *theta = y == 0 && x < 0 ? -*theta : *theta;
 }
 
 int main(int argc, char *argv[]) {
