@@ -9,6 +9,7 @@
 
 typedef unsigned int uint;
 uint PRIME = 40961;
+uint N = 8192;
 uint OMEGA = 243;
 
 Signal readSignal() {
@@ -49,48 +50,51 @@ void freeSignals(Signal *ss, const int length) {
   free(ss);
 }
 
-// computes (base^exponent) mod prime
-uint powmod(uint base, uint exponent, uint prime) {
-  uint pm = 1;
-  base = base % prime;
-  while (exponent > 0) {
-    if (exponent % 2 == 1) {
-      pm = (pm * base) % prime;
-    }
-    exponent /= 2;
-    base = (base * base) % prime;
-  } 
-  return pm;
-}
-
-void splitEvenOdd(const Signal a, Signal *signals) {
-  int n = a.length;
+Signal *_splitEvenOdd(const Signal s) {
+  Signal *signals = malloc(4 * sizeof(Signal));
+  int n = s.length;
   Signal aEven = {n/2, calloc(n/2, sizeof(uint))};
   Signal aOdd  = {n/2, calloc(n/2, sizeof(uint))};
   for (int i = 0; i < n; i += 2) {
-    aEven.signal[i/2] = a.signal[i];
-    aOdd.signal[i/2] = a.signal[i+1];
+    aEven.signal[i/2] = s.signal[i];
+    aOdd.signal[i/2] = s.signal[i+1];
   }
   signals[0] = aEven;
   signals[1] = aOdd;
+  return signals;
 }
 
-Signal ntt(const Signal a) {
-  int n = a.length;
+Signal _ntt(const Signal s, const uint omega) {
+  uint n = s.length;
   if (n == 1) {
     Signal y = {n, calloc(n, sizeof(uint))};
-    y.signal[0] = a.signal[0];
+    y.signal[0] = s.signal[0];
     return y;
   }
-  Signal *signals = calloc(4, sizeof(Signal));
-  splitEvenOdd(a, signals); 
-  signals[2] = ntt(signals[0]);
-  signals[3] = ntt(signals[1]);
+  uint x = 1;
+  Signal *ss = _splitEvenOdd(s);  // ss[0] = a_even, ss[1] = a_odd
+  ss[2] = _ntt(ss[0], (omega * omega) % PRIME);   // ss[2] = y_even
+  ss[3] = _ntt(ss[1], (omega * omega) % PRIME);   // ss[3] = y_odd
   Signal y = {n, calloc(n, sizeof(uint))};
   for (int i = 0; i < n/2; i++) {
-    y.signal[i] = signals[2].signal[i] + powmod(OMEGA, i, PRIME) % PRIME;
-    y.signal[i+n/2] = signals[3].signal[i] - powmod(OMEGA, i, PRIME) % PRIME;
+    y.signal[i]     = (ss[2].signal[i] + x * ss[3].signal[i]) % PRIME;
+    y.signal[i+n/2] = (ss[2].signal[i] + PRIME - x * ss[3].signal[i] % PRIME) % PRIME;
+    x = (x * omega) % PRIME;
   }
-  freeSignals(signals, 4);
+  freeSignals(ss, 4);
   return y; 
+}
+
+uint _findOmega(const int length) {
+  uint n = N;
+  uint omega = OMEGA;
+  while (n != length) {
+    n /= 2;
+    omega = (omega * omega) % PRIME;
+  }
+  return omega;
+}
+
+Signal ntt(const Signal s) {
+  return _ntt(s, _findOmega(s.length));
 }

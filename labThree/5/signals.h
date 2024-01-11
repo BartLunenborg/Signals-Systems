@@ -36,6 +36,13 @@ void printSignal(const Signal s);
  */
 void freeSignals(Signal *signals, const int length);
 
+
+/**
+ * Given a signal performs the forward number theoretic transform (fntt).
+ * Assuming the signal.length is a power of 2.
+ * @param signal  The signal to perform the fntt on.
+ * @return        The Signal that is the result of the fntt (to be freed by caller).
+ */
 Signal ntt(const Signal a);
 
 #endif

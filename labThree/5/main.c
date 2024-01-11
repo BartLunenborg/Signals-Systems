@@ -9,9 +9,10 @@
 int main(int argc, char *argv[]) {
   Signal *signals = malloc(3 * sizeof(Signal));
   signals[0] = readSignal();
+
   signals[1] = ntt(signals[0]);
   printSignal(signals[1]);
 
-  //freeSignals(signals, 2);
+  freeSignals(signals, 2);
   return 0;
 }
