@@ -158,10 +158,10 @@ Signal convolve(const Signal v, const Signal w) {
   uint len = v.length + w.length - 1;
   uint n = _powerOfTwo(len);
 
-  // fntt of each
+  // fntt of each after padding with zeros
   Signal *fnttvw = _fntts(_padZeros(v, w, n)); 
   
-  // component multiply
+  // component multiply (reuse signals[0])
   for (int i = 0; i < n; i++) {
     fnttvw[0].signal[i] *= fnttvw[1].signal[i];
   }
@@ -170,7 +170,7 @@ Signal convolve(const Signal v, const Signal w) {
   Signal y = intt(fnttvw[0]);
   freeSignals(fnttvw, 2);
 
-  // adjust y
+  // adjust y to correct length
   y.length = len;
   y.signal = realloc(y.signal, y.length * sizeof(uint));
   return y;
