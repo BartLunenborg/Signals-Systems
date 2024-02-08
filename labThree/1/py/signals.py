@@ -1,4 +1,3 @@
-from typing import List
 from math import pi
 import cmath
 
@@ -9,7 +8,7 @@ class Signal:
         length: int
         signal: List[[complex]]
     """
-    def __init__(self, length: int, signal: List[complex]):
+    def __init__(self, length: int, signal: list[complex]):
         self.length = length
         self.signal = signal
 
