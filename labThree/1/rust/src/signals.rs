@@ -1,12 +1,15 @@
-use std::{f64::consts::PI, io::{self, BufRead}};
 use num_complex::Complex64;
+use std::{
+    f64::consts::PI,
+    io::{self, BufRead},
+};
 
 /// Represents a signal with a length and data.
 pub struct Signal {
     /// The length of the signal.
     length: i32,
     /// The data of the signal, as a Vec<Complex64>.
-    data: Vec<Complex64>
+    data: Vec<Complex64>,
 }
 
 /// Reads a signal from standard input.
@@ -18,15 +21,10 @@ pub struct Signal {
 pub fn read_signal() -> Signal {
     let mut line = String::new();
     let stdin = io::stdin();
-    stdin.lock()
-        .read_line(&mut line)
-        .unwrap();
+    stdin.lock().read_line(&mut line).unwrap();
 
     let (length, data) = line.split_once(":").unwrap();
-    let length = length
-        .trim()
-        .parse::<i32>()
-        .unwrap();
+    let length = length.trim().parse::<i32>().unwrap();
     let data: Vec<Complex64> = data
         .trim()
         .trim_start_matches("[")
@@ -35,7 +33,7 @@ pub fn read_signal() -> Signal {
         .filter_map(|c| c.parse().ok())
         .collect();
 
-    Signal { length, data}
+    Signal { length, data }
 }
 
 /// Prints a Signal to standard output.
@@ -47,7 +45,8 @@ pub fn read_signal() -> Signal {
 /// // Output: 5: [1,2,3,4,5]
 /// ```
 pub fn print_signal(s: &Signal) {
-    let formatted_data: String = s.data
+    let formatted_data: String = s
+        .data
         .iter()
         .map(|num| num.re.round() as i32)
         .map(|num| num.to_string())
@@ -76,31 +75,49 @@ fn fft(s: Signal, omega: Complex64) -> Signal {
         return s;
     }
 
-    let mut x: Complex64 = Complex64 {re: 1.0, im: 0.0};
+    let mut x: Complex64 = Complex64 { re: 1.0, im: 0.0 };
 
     let odd: Vec<_> = s.data.iter().skip(1).step_by(2).cloned().collect();
     let even: Vec<_> = s.data.iter().step_by(2).cloned().collect();
 
-    let odd_fft = fft(Signal {length: n / 2, data: odd }, omega * omega);
-    let even_fft = fft(Signal {length: n / 2, data: even }, omega * omega);
-    
-    let un: usize = n.try_into().unwrap();
-    let mut result: Vec<_> = vec![Complex64 {re: 0.0, im: 0.0}; un];
+    let odd_fft = fft(
+        Signal {
+            length: n / 2,
+            data: odd,
+        },
+        omega * omega,
+    );
+    let even_fft = fft(
+        Signal {
+            length: n / 2,
+            data: even,
+        },
+        omega * omega,
+    );
 
-    for i in 0..(un/2) {
-        result[i]      = even_fft.data[i] + x * odd_fft.data[i];
-        result[i+un/2] = even_fft.data[i] - x * odd_fft.data[i];
+    let un: usize = n.try_into().unwrap();
+    let mut result: Vec<_> = vec![Complex64 { re: 0.0, im: 0.0 }; un];
+
+    for i in 0..(un / 2) {
+        result[i] = even_fft.data[i] + x * odd_fft.data[i];
+        result[i + un / 2] = even_fft.data[i] - x * odd_fft.data[i];
         x *= omega;
     }
 
-    Signal {length: n, data: result}
+    Signal {
+        length: n,
+        data: result,
+    }
 }
 
 /// Creates a new Signal of length n padded with 0's
 fn pad_signal(s: &Signal, n: i32) -> Signal {
     let mut padded_data = s.data.clone();
-    padded_data.resize_with(n.try_into().unwrap(), || Complex64 {re: 0.0, im: 0.0});
-    Signal { length: n, data: padded_data }
+    padded_data.resize_with(n.try_into().unwrap(), || Complex64 { re: 0.0, im: 0.0 });
+    Signal {
+        length: n,
+        data: padded_data,
+    }
 }
 
 /// Given two Signals, returns the convolution calculated using the fft.
@@ -115,16 +132,27 @@ pub fn convolve(x: &Signal, y: &Signal) -> Signal {
     let xfft = fft(x_padded, omega);
     let yfft = fft(y_padded, omega);
 
-    let xy: Vec<_> = xfft.data
+    let xy: Vec<_> = xfft
+        .data
         .iter()
         .zip(yfft.data.iter())
         .map(|(x, y)| x * y)
         .collect();
 
-    let z_vec: Vec<_> = fft(Signal {length: n, data: xy}, omega.conj()).data
-        .iter()
-        .map(|x| x / n as f64)
-        .collect();
+    let z_vec: Vec<_> = fft(
+        Signal {
+            length: n,
+            data: xy,
+        },
+        omega.conj(),
+    )
+    .data
+    .iter()
+    .map(|x| x / n as f64)
+    .collect();
 
-    Signal {length: z_length, data: z_vec[..z_length as usize].to_vec()}
+    Signal {
+        length: z_length,
+        data: z_vec[..z_length as usize].to_vec(),
+    }
 }

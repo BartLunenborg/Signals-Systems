@@ -1,5 +1,5 @@
 mod signals;
-use signals::{print_signal, read_signal, convolve};
+use signals::{convolve, print_signal, read_signal};
 
 fn main() {
     let x = read_signal();
