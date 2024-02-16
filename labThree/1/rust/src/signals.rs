@@ -23,13 +23,13 @@ pub fn read_signal() -> Signal {
     let stdin = io::stdin();
     stdin.lock().read_line(&mut line).unwrap();
 
-    let (length, data) = line.split_once(":").unwrap();
+    let (length, data) = line.split_once(':').unwrap();
     let length = length.trim().parse::<i32>().unwrap();
     let data: Vec<Complex64> = data
         .trim()
-        .trim_start_matches("[")
-        .trim_end_matches("]")
-        .split(",")
+        .trim_start_matches('[')
+        .trim_end_matches(']')
+        .split(',')
         .filter_map(|c| c.parse().ok())
         .collect();
 
