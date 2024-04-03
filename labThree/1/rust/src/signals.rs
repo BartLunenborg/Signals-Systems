@@ -12,6 +12,27 @@ pub struct Signal {
     data: Vec<Complex64>,
 }
 
+impl Signal {
+    /// Prints a Signal to standard output.
+    /// # Examples
+    /// ```
+    /// // s is a Signal with data [1+ni, 2+ni, 3+ni, 4+ni, 5+ni]
+    /// // where n can be anything
+    /// print_signal(&s);
+    /// // Output: 5: [1,2,3,4,5]
+    /// ```
+    pub fn print_signal(&self) {
+        let formatted_data: String = self
+            .data
+            .iter()
+            .map(|num| num.re.round() as i32)
+            .map(|num| num.to_string())
+            .collect::<Vec<String>>()
+            .join(",");
+        println!("{}: [{}]", self.length, formatted_data);
+    }
+}
+
 /// Reads a signal from standard input.
 /// The signal should be formatted:
 /// ```
@@ -34,25 +55,6 @@ pub fn read_signal() -> Signal {
         .collect();
 
     Signal { length, data }
-}
-
-/// Prints a Signal to standard output.
-/// # Examples
-/// ```
-/// // s is a Signal with data [1+ni, 2+ni, 3+ni, 4+ni, 5+ni]
-/// // where n can be anything
-/// print_signal(&s);
-/// // Output: 5: [1,2,3,4,5]
-/// ```
-pub fn print_signal(s: &Signal) {
-    let formatted_data: String = s
-        .data
-        .iter()
-        .map(|num| num.re.round() as i32)
-        .map(|num| num.to_string())
-        .collect::<Vec<String>>()
-        .join(",");
-    println!("{}: [{}]", s.length, formatted_data);
 }
 
 /// finds the smallest number >= n that is a power of 2
