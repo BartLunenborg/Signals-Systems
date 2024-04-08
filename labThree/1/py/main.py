@@ -2,7 +2,7 @@ from signals import *
 
 
 def main():
-    z = fft(readSignal(), readSignal())
+    z = convolve(Signal.read_new_signal(), Signal.read_new_signal())
     z.print()
 
 

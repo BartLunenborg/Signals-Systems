@@ -20,19 +20,18 @@ class Signal:
         nums = ",".join([str(int(round(n.real))) for n in self.signal])
         print(f"{self.length}: [{nums}]")
 
-
-def readSignal():
-    """
-    Given a string read from the std.in formatted
-    >>> n: [1,2,3,...,n]
-    Parses the string and return a Signal object
-    """
-    n, array = input().strip().split(": ")
-    return Signal(int(n), [complex(num) for num in array[1:len(array)-1].split(",")])
+    @classmethod
+    def read_new_signal(cls) -> 'Signal':
+        """
+        Create a Signal instance given a string read from the std.in formatted
+        >>> n: [1,2,3,...,n]
+        """
+        n, array = input().strip().split(": ")
+        return cls(int(n), [complex(num) for num in array[1:len(array)-1].split(",")])
 
 
 # Cooley and Tukey fft algorithm implementation
-def _fft(omega: complex, s: Signal):
+def _fft(omega: complex, s: Signal) -> Signal:
     if s.length == 1:
         return s
 
@@ -49,7 +48,7 @@ def _fft(omega: complex, s: Signal):
     return Signal(n, array)
 
 
-def fft(x: Signal, y: Signal) -> Signal:
+def convolve(x: Signal, y: Signal) -> Signal:
     """
     Given Signal x and y, returns the convolution Signal z.
     The fft algorithm is used to calculate z.
