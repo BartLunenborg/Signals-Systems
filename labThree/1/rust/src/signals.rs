@@ -18,7 +18,7 @@ impl Signal {
     /// ```
     /// // s is a Signal with data [1+ni, 2+ni, 3+ni, 4+ni, 5+ni]
     /// // where n can be anything
-    /// print_signal(&s);
+    /// s.print_signal();
     /// // Output: 5: [1,2,3,4,5]
     /// ```
     pub fn print_signal(&self) {
