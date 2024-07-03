@@ -10,16 +10,36 @@ pub struct Signal {
 }
 
 impl Signal {
+    /// Get the length of the `data` vector of `Signal`.
+    pub fn len(&self) -> i32 {
+        self.length
+    }
+
+    /// Get a reference to the `data` vector.
+    pub fn data(&self) -> &Vec<Complex64> {
+        &self.data
+    }
+
     /// Reads a signal of length `n` from standard input.
     /// The input string should be formatted:
     /// `n: [1,2,3,..,n]`
     /// # Example
     /// ```
     /// # use std::io;
-    /// # use crate::signals::Signal;
+    /// # use fft::Signal;
+    /// # use num_complex::Complex;
     /// let reader = io::Cursor::new("4: [6,2,3,4]");
     /// let s: Signal = Signal::new(reader);
-    /// assert_eq!(s.length(), 4);
+    /// assert_eq!(s.len(), 4);
+    /// assert_eq!(
+    ///     s.data().clone(), 
+    ///     vec![
+    ///         Complex::new(6.0, 0.0),
+    ///         Complex::new(2.0, 0.0),
+    ///         Complex::new(3.0, 0.0),
+    ///         Complex::new(4.0, 0.0),
+    ///     ]
+    /// );
     /// ```
     pub fn new(mut reader: impl io::BufRead) -> Self {
         let mut line = String::new();
@@ -41,10 +61,13 @@ impl Signal {
     /// Prints a Signal to standard output.
     /// # Examples
     /// ```
-    /// // s is a Signal with data [1+ni, 2+ni, 3+ni, 4+ni, 5+ni]
-    /// // where n can be anything
+    /// // s is a Signal with data [a+bi, a+bi, a+bi, a+bi, a+bi]
+    /// // where a and b can by any integer.
+    /// # use std::io;
+    /// # use fft::Signal;
+    /// let reader = io::Cursor::new("5: [1,2,3,4,8]");
+    /// let s: Signal = Signal::new(reader);
     /// s.print();
-    /// // Output: 5: [1,2,3,4,5]
     /// ```
     pub fn print(&self) {
         let formatted_data: String = self
@@ -161,7 +184,7 @@ fn pad_signal(s: &Signal, n: i32) -> Signal {
 
 #[cfg(test)]
 mod tests {
-    use crate::signals::Signal;
+    use crate::Signal;
     use std::io;
 
     #[test]
