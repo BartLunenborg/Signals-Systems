@@ -1,60 +1,97 @@
 use num_complex::Complex64;
-use std::{
-    f64::consts::PI,
-    io::{self, BufRead},
-};
+use std::{f64::consts::PI, io};
 
 /// Represents a signal with a length and data.
 pub struct Signal {
     /// The length of the signal.
     length: i32,
-    /// The data of the signal, as a Vec<Complex64>.
+    /// The data of the signal, as a `Vec<Complex64>`.
     data: Vec<Complex64>,
 }
 
 impl Signal {
+    /// Reads a signal of length `n` from standard input.
+    /// The input string should be formatted:
+    /// `n: [1,2,3,..,n]`
+    /// # Example
+    /// ```
+    /// # use std::io;
+    /// # use crate::signals::Signal;
+    /// let reader = io::Cursor::new("4: [6,2,3,4]");
+    /// let s: Signal = Signal::new(reader);
+    /// assert_eq!(s.length(), 4);
+    /// ```
+    pub fn new(mut reader: impl io::BufRead) -> Self {
+        let mut line = String::new();
+        reader.read_line(&mut line).unwrap();
+
+        let (length, data) = line.split_once(':').unwrap();
+        let length = length.trim().parse::<i32>().unwrap();
+        let data: Vec<Complex64> = data
+            .trim()
+            .trim_start_matches('[')
+            .trim_end_matches(']')
+            .split(',')
+            .filter_map(|c| c.parse().ok())
+            .collect();
+
+        Signal { length, data }
+    }
+
     /// Prints a Signal to standard output.
     /// # Examples
     /// ```
     /// // s is a Signal with data [1+ni, 2+ni, 3+ni, 4+ni, 5+ni]
     /// // where n can be anything
-    /// s.print_signal();
+    /// s.print();
     /// // Output: 5: [1,2,3,4,5]
     /// ```
-    pub fn print_signal(&self) {
+    pub fn print(&self) {
         let formatted_data: String = self
             .data
             .iter()
-            .map(|num| num.re.round() as i32)
-            .map(|num| num.to_string())
+            .map(|num| (num.re.round() as i32).to_string())
             .collect::<Vec<String>>()
             .join(",");
         println!("{}: [{}]", self.length, formatted_data);
     }
-}
 
-/// Reads a signal from standard input.
-/// The signal should be formatted:
-/// ```
-/// n: [1,2,3,..,n]
-/// let s: Signal = read_signal();
-/// ```
-pub fn read_signal() -> Signal {
-    let mut line = String::new();
-    let stdin = io::stdin();
-    stdin.lock().read_line(&mut line).unwrap();
+    /// Given two Signals, returns the convolution calculated using the fft.
+    pub fn convolve(&self, y: &Signal) -> Signal {
+        let z_length = self.length + y.length - 1;
+        let n = power_of_two(z_length);
 
-    let (length, data) = line.split_once(':').unwrap();
-    let length = length.trim().parse::<i32>().unwrap();
-    let data: Vec<Complex64> = data
-        .trim()
-        .trim_start_matches('[')
-        .trim_end_matches(']')
-        .split(',')
-        .filter_map(|c| c.parse().ok())
+        let x_padded: Signal = pad_signal(self, n);
+        let y_padded: Signal = pad_signal(y, n);
+
+        let omega: Complex64 = Complex64::from_polar(1.0, 2.0 * PI / n as f64);
+        let xfft = fft(x_padded, omega);
+        let yfft = fft(y_padded, omega);
+
+        let xy: Vec<_> = xfft
+            .data
+            .iter()
+            .zip(yfft.data.iter())
+            .map(|(x, y)| x * y)
+            .collect();
+
+        let z_vec: Vec<_> = fft(
+            Signal {
+                length: n,
+                data: xy,
+            },
+            omega.conj(),
+        )
+        .data
+        .iter()
+        .map(|x| x / n as f64)
         .collect();
 
-    Signal { length, data }
+        Signal {
+            length: z_length,
+            data: z_vec[..z_length as usize].to_vec(),
+        }
+    }
 }
 
 /// finds the smallest number >= n that is a power of 2
@@ -122,39 +159,17 @@ fn pad_signal(s: &Signal, n: i32) -> Signal {
     }
 }
 
-/// Given two Signals, returns the convolution calculated using the fft.
-pub fn convolve(x: &Signal, y: &Signal) -> Signal {
-    let z_length = x.length + y.length - 1;
-    let n = power_of_two(z_length);
+#[cfg(test)]
+mod tests {
+    use crate::signals::Signal;
+    use std::io;
 
-    let x_padded: Signal = pad_signal(x, n);
-    let y_padded: Signal = pad_signal(y, n);
-
-    let omega: Complex64 = Complex64::from_polar(1.0, 2.0 * PI / n as f64);
-    let xfft = fft(x_padded, omega);
-    let yfft = fft(y_padded, omega);
-
-    let xy: Vec<_> = xfft
-        .data
-        .iter()
-        .zip(yfft.data.iter())
-        .map(|(x, y)| x * y)
-        .collect();
-
-    let z_vec: Vec<_> = fft(
-        Signal {
-            length: n,
-            data: xy,
-        },
-        omega.conj(),
-    )
-    .data
-    .iter()
-    .map(|x| x / n as f64)
-    .collect();
-
-    Signal {
-        length: z_length,
-        data: z_vec[..z_length as usize].to_vec(),
+    #[test]
+    fn test_new() {
+        let reader = io::Cursor::new("4: [6,2,3,4]");
+        let s: Signal = Signal::new(reader);
+        s.print();
+        assert_eq!(s.length, 4);
+        assert_eq!(s.data.len(), 4);
     }
 }

@@ -1,9 +1,11 @@
 mod signals;
-use signals::{convolve, read_signal};
+use std::io;
+
+use signals::Signal;
 
 fn main() {
-    let x = read_signal();
-    let y = read_signal();
-    let z = convolve(&x, &y);
-    z.print_signal();
+    let x = Signal::new(io::stdin().lock());
+    let y = Signal::new(io::stdin().lock());
+    let z = x.convolve(&y);
+    z.print();
 }
